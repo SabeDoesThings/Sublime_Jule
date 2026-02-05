@@ -1,0 +1,215 @@
+%YAML 1.2
+---
+name: Jule
+scope: source.jule
+file_extensions:
+  - jule
+
+contexts:
+  main:
+    - include: directives
+    - include: comments
+    - include: strings
+    - include: raw_strings
+    - include: runes
+    - include: functions
+    - include: structs
+    - include: keywords
+    - include: types
+    - include: storage
+    - include: constants
+    - include: numbers
+    - include: operators
+    - include: punctuation
+    - include: identifiers
+
+  # ------------------------
+  # Directives
+  # ------------------------
+  directives:
+    - match: '#[A-Za-z_]\w*'
+      scope: meta.preprocessor.jule
+
+  # ------------------------
+  # Keywords
+  # ------------------------
+  keywords:
+    - match: '\b(map|type|impl|trait|struct|enum|fn|co|unsafe|chan|async|await|extern)\b'
+      scope: keyword.declaration.jule
+    - match: '\b(ret|goto|for|in|break|continue|if|error|else|match|defer|select|fall|use)\b'
+      scope: keyword.control.jule
+
+  # ------------------------
+  # Types
+  # ------------------------
+  types:
+    - match: '\b(int|uint|uintptr|i8|i16|i32|i64|u8|u16|u32|u64|f32|f64|cmplx64|cmplx128|bool|str|any|byte|rune)\b'
+      scope: storage.type.jule
+
+  # ------------------------
+  # Storage modifiers
+  # ------------------------
+  storage:
+    - match: '\b(let|const|mut|self)\b'
+      scope: storage.modifier.jule
+
+  # ------------------------
+  # Constants
+  # ------------------------
+  constants:
+    - match: '\b(true|false|nil|iota)\b'
+      scope: constant.language.jule
+
+  # ------------------------
+  # Functions
+  # ------------------------
+  functions:
+    - match: '\b(fn)\s+([A-Za-z_]\w*)'
+      captures:
+        1: keyword.declaration.function.jule
+        2: entity.name.function.jule
+
+  # ------------------------
+  # Structs
+  # ------------------------
+  structs:
+    - match: '\b(struct)\s+([A-Za-z_]\w*)'
+      captures:
+        1: keyword.declaration.struct.jule
+        2: entity.name.struct.jule
+
+  # ------------------------
+  # Identifiers
+  # ------------------------
+  identifiers:
+    - match: '\b[A-Z][A-Za-z0-9_]*\b'
+      scope: entity.name.type.jule
+    - match: '[A-Za-z_]\w*'
+      scope: variable.other.jule
+
+  # ------------------------
+  # Strings
+  # ------------------------
+  strings:
+    - match: '"'
+      scope: punctuation.definition.string.begin.jule
+      push:
+        - meta_scope: string.quoted.double.jule
+        - match: '"'
+          scope: punctuation.definition.string.end.jule
+          pop: true
+        - match: '\\([0-7]{3}|[abfnrtv\\''"]|x[0-9A-Fa-f]{2}|u[0-9A-Fa-f]{4}|U[0-9A-Fa-f]{8})'
+          scope: constant.character.escape.jule
+        - match: '\\.'
+          scope: invalid.illegal.unknown-escape.jule
+
+  # ------------------------
+  # Raw strings
+  # ------------------------
+  raw_strings:
+    - match: '`'
+      scope: punctuation.definition.string.begin.jule
+      push:
+        - meta_scope: string.quoted.raw.jule
+        - match: '`'
+          scope: punctuation.definition.string.end.jule
+          pop: true
+
+  # ------------------------
+  # Runes (character literals)
+  # ------------------------
+  runes:
+    - match: "'"
+      scope: punctuation.definition.string.begin.jule
+      push:
+        - meta_scope: string.quoted.single.jule
+        - match: "'"
+          scope: punctuation.definition.string.end.jule
+          pop: true
+        - match: '\\([0-7]{3}|[abfnrtv\\''"]|x[0-9A-Fa-f]{2}|u[0-9A-Fa-f]{4}|U[0-9A-Fa-f]{8})'
+          scope: constant.character.escape.jule
+        - match: '\\.'
+          scope: constant.character.escape.jule
+        - match: '[^'']'
+          scope: constant.character.jule
+
+  # ------------------------
+  # Comments
+  # ------------------------
+  comments:
+    - match: '/\*'
+      scope: punctuation.definition.comment.begin.jule
+      push:
+        - meta_scope: comment.block.jule
+        - match: '\*/'
+          scope: punctuation.definition.comment.end.jule
+          pop: true
+        - include: comments
+
+    - match: '//'
+      scope: punctuation.definition.comment.begin.jule
+      push:
+        - meta_scope: comment.line.double-slash.jule
+        - match: '$'
+          pop: true
+
+  # ------------------------
+  # Numbers
+  # ------------------------
+  numbers:
+    - match: '\b0[xX][0-9A-Fa-f_]+\b'
+      scope: constant.numeric.integer.hexadecimal.jule
+    - match: '\b0[bB][01_]+\b'
+      scope: constant.numeric.integer.binary.jule
+    - match: '\b0[oO][0-7_]+\b'
+      scope: constant.numeric.integer.octal.jule
+    - match: '\b\d[\d_]*\.[\d_]+([eE][+-]?\d[\d_]*)?\b'
+      scope: constant.numeric.float.jule
+    - match: '\b\d[\d_]*([eE][+-]?\d[\d_]*)?\b'
+      scope: constant.numeric.integer.decimal.jule
+
+  # ------------------------
+  # Operators
+  # ------------------------
+  operators:
+    - match: ':='
+      scope: keyword.operator.assignment.jule
+    - match: '\+\+|--'
+      scope: keyword.operator.arithmetic.jule
+    - match: '\+|-|\*|/|%'
+      scope: keyword.operator.arithmetic.jule
+    - match: '==|!=|>=|<=|>|<'
+      scope: keyword.operator.comparison.jule
+    - match: '&&|\|\||!'
+      scope: keyword.operator.logical.jule
+    - match: '=|\+=|-=|\*=|/=|%=|&=|\|=|\^=|<<=|>>='
+      scope: keyword.operator.assignment.jule
+    - match: '&|\||\^|<<|>>'
+      scope: keyword.operator.bitwise.jule
+
+  # ------------------------
+  # Punctuation
+  # ------------------------
+  punctuation:
+    - match: '::'
+      scope: punctuation.accessor.double-colon.jule
+    - match: '\.'
+      scope: punctuation.accessor.dot.jule
+    - match: ','
+      scope: punctuation.separator.comma.jule
+    - match: ';'
+      scope: punctuation.terminator.statement.jule
+    - match: ':(?!=)'
+      scope: punctuation.separator.jule
+    - match: '\('
+      scope: punctuation.section.parens.begin.jule
+    - match: '\)'
+      scope: punctuation.section.parens.end.jule
+    - match: '\{'
+      scope: punctuation.section.braces.begin.jule
+    - match: '\}'
+      scope: punctuation.section.braces.end.jule
+    - match: '\['
+      scope: punctuation.section.brackets.begin.jule
+    - match: '\]'
+      scope: punctuation.section.brackets.end.jule
